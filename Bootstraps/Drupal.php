@@ -61,35 +61,3 @@ class Drupal implements StackableBootstrapInterface
         return $stack;
     }
 }
-
-use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Config\Loader\LoaderInterface;
-
-final class BasicKernel extends Kernel
-{
-	public function registerBundles()
-	{
-		$bundles = [
-		// we'll put stuff here later
-		];
-		return $bundles;
-	}
-	public function registerContainerConfiguration(LoaderInterface $loader)
-	{
-
-	}
-	public function getLogDir()
-	{
-		return __DIR__.'/../var/log';
-	}
-	public function getCacheDir()
-	{
-		return __DIR__.'/../var/cache/'.$this->getEnvironment();
-	}
-
-	public function boot()
-	{
-		echo __FUNCTION__ . ': "booted". ';
-	}
-
-}
