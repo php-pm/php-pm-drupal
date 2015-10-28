@@ -1,0 +1,13 @@
+diff --git a/core/lib/Drupal/Core/DrupalKernel.php b/core/lib/Drupal/Core/DrupalKernel.php
+index 16b3bac..c84286b 100644
+--- a/core/lib/Drupal/Core/DrupalKernel.php
++++ b/core/lib/Drupal/Core/DrupalKernel.php
+@@ -383,7 +383,7 @@ public static function findSitePath(Request $request, $require_settings = TRUE)
+    * {@inheritdoc}
+    */
+   public function setSitePath($path) {
+-    if ($this->booted) {
++    if ($this->booted && $path !== $this->sitePath) {
+       throw new \LogicException('Site path cannot be changed after calling boot()');
+     }
+     $this->sitePath = $path;
