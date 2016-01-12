@@ -1,6 +1,6 @@
 # PHP-PM HttpKernel Adapter
 
-This is a fork of the HttpKernel adapter for use of Symfony and Laravel frameworks with PHP-PM. See https://github.com/php-pm/php-pm to provide a bootstrap & bridge for Drupal.
+This is a fork of the HttpKernel adapter for use of Drupal with PHP-PM. See https://github.com/php-pm/php-pm, https://github.com/php-pm/php-pm-httpkernel.
 
 The code is in pre-alpha -- very experimental.
 
