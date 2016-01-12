@@ -1,8 +1,8 @@
 # PHP-PM HttpKernel Adapter
 
-This is a fork of the HttpKernel adapter for use of Drupal with PHP-PM. See https://github.com/php-pm/php-pm, https://github.com/php-pm/php-pm-httpkernel.
+This is a fork of PHP-PM's HttpKernel adapter for integrating Drupal with PHP-PM (therefore, also with ReactPHP). See https://github.com/php-pm/php-pm, https://github.com/php-pm/php-pm-httpkernel.
 
-The code is in pre-alpha -- very experimental.
+The code is in pre-alpha -- very experimental.  Last tested against `drupal-8.0.0-rc1`.
 
 ### Setup
 
