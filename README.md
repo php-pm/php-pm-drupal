@@ -12,4 +12,4 @@ The code is in pre-alpha -- very experimental.  Last tested against `drupal-8.0.
 
   3. Apply `kentr-allow-repeated-setSitePath-in-DrupalKernel.patch` to Drupal core.
 
-  4. Start php-pm with `sudo vendor/bin/ppm start /var/www/html/ --bridge=httpKernel --bootstrap=PHPPM\\Bootstraps\\Drupal`.
+  4. Start php-pm with `sudo <absolute path to web root>/vendor/bin/ppm start <absolute path to web root> --bridge=httpKernel --bootstrap=PHPPM\\Bootstraps\\Drupal`.  Example: `sudo vendor/bin/ppm start /var/www/html/ --bridge=httpKernel --bootstrap=PHPPM\\Bootstraps\\Drupal`
