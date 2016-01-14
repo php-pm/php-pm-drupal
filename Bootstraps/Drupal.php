@@ -13,7 +13,10 @@ use Stack\Builder;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * A default bootstrap for the Drupal framework.
+ * A PHP-PM bootstrap for the Drupal framework.
+ *
+ * @see \PHPPM\Bootstraps\Symfony
+ * @see \PHPPM\Bridges\HttpKernel
  */
 class Drupal implements StackableBootstrapInterface {
   /**
