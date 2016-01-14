@@ -2,7 +2,7 @@
 
 This is a fork of PHP-PM's HttpKernel adapter for integrating Drupal with PHP-PM (therefore, also with ReactPHP). See https://github.com/php-pm/php-pm, https://github.com/php-pm/php-pm-httpkernel.
 
-The code is in pre-alpha -- very experimental.  Last tested against `drupal-8.0.0-rc1`.
+The code is in pre-alpha -- very experimental.  Last tested against `drupal-8.0.2`.
 
 ### Setup
 
