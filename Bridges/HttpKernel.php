@@ -122,9 +122,18 @@ class HttpKernel implements BridgeInterface
             parse_str($content, $post);
         }
 
+        $cookies = array();
+        if (isset($headers['Cookie'])) {
+          $headersCookie = explode(';', $headers['Cookie']);
+          foreach ($headersCookie as $cookie) {
+            list($name, $value) = explode('=', trim($cookie));
+            $cookies[$name] = $value;
+          }
+        }
+
         $syRequest = new SymfonyRequest(
             // $query, $request, $attributes, $cookies, $files, $server, $content
-            $query, $post, array(), array(), array(), array(), $content
+            $query, $post, array(), $cookies, array(), array(), $content
         );
 
         $syRequest->setMethod($method);
