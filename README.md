@@ -10,6 +10,8 @@ The code is in pre-alpha -- very experimental.  Last tested against `drupal-8.0.
 
   2. Replace the `vendor/php-pm/httpkernel-adapter` directory with this code.
 
-  3. Apply `kentr-allow-repeated-setSitePath-in-DrupalKernel.patch` to Drupal core.
+  3. Apply patches to Drupal core:
+    * `kentr-allow-repeated-setSitePath-in-DrupalKernel.patch`
+    * `stop_using-2505339-24.patch`
 
   4. Start php-pm with `sudo <absolute path to web root>/vendor/bin/ppm start <absolute path to web root> --bridge=httpKernel --bootstrap=PHPPM\\Bootstraps\\Drupal`.  Example: `sudo vendor/bin/ppm start /var/www/html/ --bridge=httpKernel --bootstrap=PHPPM\\Bootstraps\\Drupal`
