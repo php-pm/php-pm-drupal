@@ -1,0 +1,240 @@
+diff --git a/core/lib/Drupal/Core/EventSubscriber/DefaultExceptionHtmlSubscriber.php b/core/lib/Drupal/Core/EventSubscriber/DefaultExceptionHtmlSubscriber.php
+index 46336e0..a21dc40 100644
+--- a/core/lib/Drupal/Core/EventSubscriber/DefaultExceptionHtmlSubscriber.php
++++ b/core/lib/Drupal/Core/EventSubscriber/DefaultExceptionHtmlSubscriber.php
+@@ -45,6 +45,16 @@ class DefaultExceptionHtmlSubscriber extends HttpExceptionSubscriberBase {
+   protected $redirectDestination;
+ 
+   /**
++   * URL query attribute to specify the status code resulting from an exception.
++   */
++  const EXCEPTION_STATUSCODE = '_exception_statuscode';
++
++  /**
++   * URL query attribute to specify the location where an exception occured.
++   */
++  const EXCEPTION_LOCATION = '_exception_location';
++
++  /**
+    * Constructs a new DefaultExceptionHtmlSubscriber.
+    *
+    * @param \Symfony\Component\HttpKernel\HttpKernelInterface $http_kernel
+@@ -127,11 +137,22 @@ protected function makeSubrequest(GetResponseForExceptionEvent $event, $url, $st
+     $current_url = $request->getBasePath() . $request->getPathInfo();
+ 
+     if ($url != $request->getBasePath() . '/' && $url != $current_url) {
++      // Pass the current location and the status code into the subrequest.
++      // Forms rendered on that page may then leverage this information, e.g.,
++      // to redirect to the original location after a successfull login. Note
++      // that the 'destination' parameter takes precedence over a form redirect
++      // and thus cannot be used here. Otherwise it would be impossible to
++      // implement forms on an error page which need to redirect to a specific
++      // location after submission.
++      $exception_params = [
++        static::EXCEPTION_LOCATION => $this->redirectDestination->get(),
++        static::EXCEPTION_STATUSCODE => $status_code,
++      ];
+       if ($request->getMethod() === 'POST') {
+-        $sub_request = Request::create($url, 'POST', $this->redirectDestination->getAsArray() + ['_exception_statuscode' => $status_code] + $request->request->all(), $request->cookies->all(), [], $request->server->all());
++        $sub_request = Request::create($url, 'POST', $exception_params + $request->request->all(), $request->cookies->all(), [], $request->server->all());
+       }
+       else {
+-        $sub_request = Request::create($url, 'GET', $request->query->all() + $this->redirectDestination->getAsArray() + ['_exception_statuscode' => $status_code], $request->cookies->all(), [], $request->server->all());
++        $sub_request = Request::create($url, 'GET', $request->query->all() + $exception_params, $request->cookies->all(), [], $request->server->all());
+       }
+ 
+       try {
+diff --git a/core/lib/Drupal/Core/Form/FormBuilder.php b/core/lib/Drupal/Core/Form/FormBuilder.php
+index bb7034f..19e4a53 100644
+--- a/core/lib/Drupal/Core/Form/FormBuilder.php
++++ b/core/lib/Drupal/Core/Form/FormBuilder.php
+@@ -829,9 +829,7 @@ public function prepareForm($form_id, &$form, FormStateInterface &$form_state) {
+    *   The URL to be used as the $form['#action'].
+    */
+   protected function buildFormAction() {
+-    // @todo Use <current> instead of the master request in
+-    //   https://www.drupal.org/node/2505339.
+-    $request = $this->requestStack->getMasterRequest();
++    $request = $this->requestStack->getCurrentRequest();
+     $request_uri = $request->getRequestUri();
+ 
+     // Prevent cross site requests via the Form API by using an absolute URL
+diff --git a/core/modules/system/src/Tests/Form/ExternalFormUrlTest.php b/core/modules/system/src/Tests/Form/ExternalFormUrlTest.php
+index f179ec9..9ddeaff 100644
+--- a/core/modules/system/src/Tests/Form/ExternalFormUrlTest.php
++++ b/core/modules/system/src/Tests/Form/ExternalFormUrlTest.php
+@@ -74,10 +74,11 @@ protected function setUp() {
+    * Tests form behaviour.
+    */
+   public function testActionUrlBehavior() {
+-    // Create a new request which has a request uri with multiple leading
+-    // slashes and make it the master request.
+     $request_stack = \Drupal::service('request_stack');
+-    $original_request = $request_stack->pop();
++    $original_request = $request_stack->getCurrentRequest();
++
++    // Create a new request which has a request uri with multiple leading
++    // slashes and make it the current request.
+     $request = Request::create($original_request->getSchemeAndHttpHost() . '//example.org');
+     $request_stack->push($request);
+ 
+@@ -88,11 +89,10 @@ public function testActionUrlBehavior() {
+     $elements = $this->xpath('//form/@action');
+     $action = (string) $elements[0];
+     $this->assertEqual($original_request->getSchemeAndHttpHost() . '//example.org', $action);
++    $request_stack->pop();
+ 
+     // Create a new request which has a request uri with a single leading slash
+-    // and make it the master request.
+-    $request_stack = \Drupal::service('request_stack');
+-    $original_request = $request_stack->pop();
++    // and make it the current request.
+     $request = Request::create($original_request->getSchemeAndHttpHost() . '/example.org');
+     $request_stack->push($request);
+ 
+@@ -103,6 +103,7 @@ public function testActionUrlBehavior() {
+     $elements = $this->xpath('//form/@action');
+     $action = (string) $elements[0];
+     $this->assertEqual('/example.org', $action);
++    $request_stack->pop();
+   }
+ 
+ }
+diff --git a/core/modules/system/src/Tests/Routing/DestinationTest.php b/core/modules/system/src/Tests/Routing/DestinationTest.php
+index a590d62..56a7edf 100644
+--- a/core/modules/system/src/Tests/Routing/DestinationTest.php
++++ b/core/modules/system/src/Tests/Routing/DestinationTest.php
+@@ -72,9 +72,9 @@ public function testDestination() {
+       $this->assertIdentical($test_case['output'], $post_output, $test_case['message']);
+     }
+ 
+-    // Make sure that 404 pages do not populate $_GET['destination'] with
+-    // external URLs.
+-    \Drupal::configFactory()->getEditable('system.site')->set('page.404', 'system-test/get-destination')->save();
++    // Make sure that 404 pages do not populate $_GET['_exception_location']
++    // with external URLs.
++    \Drupal::configFactory()->getEditable('system.site')->set('page.404', 'system-test/get-exception-location')->save();
+     $this->drupalGet('http://example.com', ['external' => FALSE]);
+     $this->assertResponse(404);
+     $this->assertIdentical(Url::fromRoute('<front>')->toString(), $this->getRawContent(), 'External URL is not allowed on 404 pages.');
+diff --git a/core/modules/system/tests/modules/system_test/src/Controller/SystemTestController.php b/core/modules/system/tests/modules/system_test/src/Controller/SystemTestController.php
+index 9d35102..502fb03 100644
+--- a/core/modules/system/tests/modules/system_test/src/Controller/SystemTestController.php
++++ b/core/modules/system/tests/modules/system_test/src/Controller/SystemTestController.php
+@@ -10,15 +10,16 @@
+ use Drupal\Core\Access\AccessResult;
+ use Drupal\Core\Cache\CacheableResponse;
+ use Drupal\Core\Controller\ControllerBase;
++use Drupal\Core\EventSubscriber\DefaultExceptionHtmlSubscriber;
++use Drupal\Core\Lock\LockBackendInterface;
+ use Drupal\Core\Render\RendererInterface;
+ use Drupal\Core\Render\Markup;
+ use Drupal\Core\Session\AccountInterface;
+ use Drupal\Core\Url;
++use Symfony\Component\DependencyInjection\ContainerInterface;
+ use Symfony\Component\HttpFoundation\RedirectResponse;
+ use Symfony\Component\HttpFoundation\Request;
+ use Symfony\Component\HttpFoundation\Response;
+-use Drupal\Core\Lock\LockBackendInterface;
+-use Symfony\Component\DependencyInjection\ContainerInterface;
+ 
+ /**
+  * Controller routines for system_test routes.
+@@ -149,6 +150,20 @@ public function getDestination(Request $request) {
+   }
+ 
+   /**
++   * Controller to return $_GET['_exception_location'] for testing.
++   *
++   * @param \Symfony\Component\HttpFoundation\Request $request
++   *   The request.
++   *
++   * @return \Symfony\Component\HttpFoundation\Response
++   *   The response.
++   */
++  public function getExceptionLocation(Request $request) {
++    $response = new Response($request->query->get(DefaultExceptionHtmlSubscriber::EXCEPTION_LOCATION));
++    return $response;
++  }
++
++  /**
+    * Controller to return $_REQUEST['destination'] for testing.
+    *
+    * @param \Symfony\Component\HttpFoundation\Request $request
+diff --git a/core/modules/system/tests/modules/system_test/system_test.routing.yml b/core/modules/system/tests/modules/system_test/system_test.routing.yml
+index 1fb4069..de4fa19 100644
+--- a/core/modules/system/tests/modules/system_test/system_test.routing.yml
++++ b/core/modules/system/tests/modules/system_test/system_test.routing.yml
+@@ -116,6 +116,13 @@ system_test.get_destination:
+   requirements:
+     _access: 'TRUE'
+ 
++system_test.get_exception_location:
++  path: '/system-test/get-exception-location'
++  defaults:
++    _controller: '\Drupal\system_test\Controller\SystemTestController::getExceptionLocation'
++  requirements:
++    _access: 'TRUE'
++
+ system_test.permission_dependent_content:
+   path: '/system-test/permission-dependent-content'
+   defaults:
+diff --git a/core/modules/user/src/Form/UserLoginForm.php b/core/modules/user/src/Form/UserLoginForm.php
+index b336091..88329e7 100644
+--- a/core/modules/user/src/Form/UserLoginForm.php
++++ b/core/modules/user/src/Form/UserLoginForm.php
+@@ -7,6 +7,7 @@
+ 
+ namespace Drupal\user\Form;
+ 
++use Drupal\Core\EventSubscriber\DefaultExceptionHtmlSubscriber;
+ use Drupal\Core\Flood\FloodInterface;
+ use Drupal\Core\Form\FormBase;
+ use Drupal\Core\Form\FormStateInterface;
+@@ -134,16 +135,17 @@ public function buildForm(array $form, FormStateInterface $form_state) {
+   public function submitForm(array &$form, FormStateInterface $form_state) {
+     $account = $this->userStorage->load($form_state->get('uid'));
+ 
+-    // A destination was set, probably on an exception controller,
+-    if (!$this->getRequest()->request->has('destination')) {
++    // A login form rendered on an error page (e.g. 403) should redirect to the
++    // original location after a successfull login.
++    if ($original_location = $this->getRequest()->get(DefaultExceptionHtmlSubscriber::EXCEPTION_LOCATION)) {
++      $this->getRequest()->query->set('destination', $original_location);
++    }
++    else{
+       $form_state->setRedirect(
+         'entity.user.canonical',
+         array('user' => $account->id())
+       );
+     }
+-    else {
+-      $this->getRequest()->query->set('destination', $this->getRequest()->request->get('destination'));
+-    }
+ 
+     user_login_finalize($account);
+   }
+diff --git a/core/tests/Drupal/Tests/Core/EventSubscriber/CustomPageExceptionHtmlSubscriberTest.php b/core/tests/Drupal/Tests/Core/EventSubscriber/CustomPageExceptionHtmlSubscriberTest.php
+index a7efb7e..ab2989c 100644
+--- a/core/tests/Drupal/Tests/Core/EventSubscriber/CustomPageExceptionHtmlSubscriberTest.php
++++ b/core/tests/Drupal/Tests/Core/EventSubscriber/CustomPageExceptionHtmlSubscriberTest.php
+@@ -82,8 +82,8 @@ protected function setUp() {
+     $this->redirectDestination = $this->getMock('\Drupal\Core\Routing\RedirectDestinationInterface');
+ 
+     $this->redirectDestination->expects($this->any())
+-      ->method('getAsArray')
+-      ->willReturn(['destination' => 'test']);
++      ->method('get')
++      ->willReturn('test');
+ 
+     $this->customPageSubscriber = new CustomPageExceptionHtmlSubscriber($this->configFactory, $this->aliasManager, $this->kernel, $this->logger, $this->redirectDestination);
+ 
+@@ -146,7 +146,7 @@ public function testHandleWithGetRequest() {
+ 
+     $response = $event->getResponse();
+     $result = $response->getContent() . " " . UrlHelper::buildQuery($request->request->all());
+-    $this->assertEquals('GET name=druplicon&pass=12345&destination=test&_exception_statuscode=404 ', $result);
++    $this->assertEquals('GET name=druplicon&pass=12345&_exception_location=test&_exception_statuscode=404 ', $result);
+   }
+ 
+ }
