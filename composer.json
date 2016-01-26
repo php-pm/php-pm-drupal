@@ -1,9 +1,7 @@
 {
-    "name": "php-pm/httpkernel-adapter",
+    "name": "kentr/drupal-adapter",
     "require": {
-        "stack/builder": "1.0.*",
-        "symfony/http-foundation": "~2.6",
-        "symfony/http-kernel": "~2.6"
+        "php-pm/httpkernel-adapter": "*"
     },
     "autoload": {
         "psr-4": {
