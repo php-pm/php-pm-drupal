@@ -80,7 +80,10 @@ class DrupalKernel extends SymfonyBridge implements BridgeInterface {
     $query = $reactRequest->getQuery();
     $post = array();
 
-    $requestIsPostType = in_array($method, array('POST', 'PUT', 'DELETE', 'PATCH'));
+    $requestIsPostType = in_array(
+      $method,
+      array('POST', 'PUT', 'DELETE', 'PATCH')
+    );
 
     // Parse body?
     if (isset($headers['Content-Type']) && (0 === strpos($headers['Content-Type'], 'application/x-www-form-urlencoded'))
