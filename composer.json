@@ -1,6 +1,7 @@
 {
     "name": "kentr/php-pm-drupal-adapter",
     "require": {
+        "php-pm/php-pm": "*",
         "php-pm/httpkernel-adapter": "*"
     },
     "autoload": {
