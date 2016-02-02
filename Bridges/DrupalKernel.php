@@ -114,6 +114,7 @@ class DrupalKernel extends SymfonyBridge implements BridgeInterface {
     // Set CGI/1.1 (RFC 3875) server vars.
     if (empty($_ENV)) {
       // In some cases with cli, $_ENV isn't set, so get with getenv().
+      // @see http://stackoverflow.com/questions/8798294/getenv-vs-env-in-php/21473853#21473853
       // @todo: Make this more efficient to eliminate running per request.
       // Static variable?
       $_ENV['DOCUMENT_ROOT'] = getenv('DOCUMENT_ROOT');
