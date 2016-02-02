@@ -44,8 +44,9 @@ start \
 ```
 
 ## DrupalKernel bridge
+By default, PHP-PM uses the `\PHPPM\Bridges\HttpKernel` bridge to convert a ReactPHP request into a Symfony request and the Symfony response into a ReactPHP response.
 
-`\PHPPM\Bridges\DrupalKernel` extends `\PHPPM\Bridges\HttpKernel` to populate various request meta-variables specified by CGI/1.1 (RFC 3875)[http://www.faqs.org/rfcs/rfc3875.html].
+The included `\PHPPM\Bridges\DrupalKernel` bridge extends `\PHPPM\Bridges\HttpKernel` to populate various request meta-variables specified by [CGI/1.1 (RFC 3875)](http://www.faqs.org/rfcs/rfc3875.html).
 
 ### Setup / Usage
 
