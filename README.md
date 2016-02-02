@@ -25,7 +25,7 @@ View / report issues at https://github.com/kentr/php-pm-drupal/issues.
   4. Start php-pm with
 
 ```bash
-sudo <absolute path to web root>/vendor/bin/ppm \
+<absolute path to web root>/vendor/bin/ppm \
 start \
 <absolute path to web root> \
 --bridge=httpKernel \
@@ -34,7 +34,7 @@ start \
 
 Example:
 ```bash
-sudo /var/www/html/vendor/bin/ppm \
+/var/www/html/vendor/bin/ppm \
 start \
 /var/www/html/ \
 --bridge=httpKernel \
