@@ -52,13 +52,18 @@ The included `\PHPPM\Bridges\DrupalKernel` bridge extends `\PHPPM\Bridges\HttpKe
 
   1. Install as described above.
 
-  2. Include the environment variables and the `--bridge` option in the php-pm start command:
+  2. Include the environment variables and the `--bridge` option in the php-pm start command.
+
+    Supported environment variables:
+    * **SCRIPT_NAME:** '/index.php' to emulate a standard setup where web requests execute Drupal's `index.php` script.
+    * **SERVER_NAME:** Your site's server / domain name.  If you're using trusted host settings (`$settings['trusted_host_patterns']` in `settings.php`), this must match one of the trusted hosts.
+    * **SERVER_ADDRESS:** IP address of the server.
+    * **DOCUMENT_ROOT:** Absolute filepath of the web root directory.
 
 Example:
 
 ```bash
 SCRIPT_NAME=/index.php \
-REQUEST_METHOD=GET \
 SERVER_NAME=localhost \
 SERVER_ADDRESS=127.0.0.1 \
 DOCUMENT_ROOT=/var/www/html \
