@@ -1,4 +1,4 @@
-# PHP-PM HttpKernel Adapter
+# PHP-PM HttpDrupal Adapter
 
 ## Overview
 
