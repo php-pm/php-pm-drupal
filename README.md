@@ -4,6 +4,8 @@
 
 This is a fork of PHP-PM's HttpKernel adapter for integrating Drupal with PHP-PM (therefore, also with ReactPHP).
 
+The primary components are a bootstrap and bridge.
+
 See:
 * https://github.com/php-pm/php-pm
 * https://github.com/php-pm/php-pm-httpkernel.
