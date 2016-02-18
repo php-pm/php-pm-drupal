@@ -101,10 +101,17 @@ class DrupalKernel extends SymfonyBridge implements BridgeInterface {
       }
     }
 
+    // Add any query string to URI so SymfonyRequest::create() can access it.
+    $uri = $reactRequest->getPath() .
+      (empty($query) ? '' : '?' . http_build_query($query));
+
+    // SymfonyRequest::create() expects $parameters to contain either
+    // $_GET or $_POST.
     $parameters = $requestIsPostType ? $post : $query;
+
     $syRequest = SymfonyRequest::create(
           // $uri, $method, $parameters, $cookies, $files, $server, $content.
-          $reactRequest->getPath(),
+          $uri,
           $method,
           $parameters,
           $cookies,
@@ -124,7 +131,7 @@ class DrupalKernel extends SymfonyBridge implements BridgeInterface {
       $_ENV['SCRIPT_NAME'] = getenv('SCRIPT_NAME');
     }
     $serverVars = array_merge(
-          $syRequest->server->all(),
+        $syRequest->server->all(),
         array(
           'DOCUMENT_ROOT' => $_ENV['DOCUMENT_ROOT'],
           'GATEWAY_INTERFACE' => 'CGI/1.1',
