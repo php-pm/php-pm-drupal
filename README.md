@@ -12,7 +12,7 @@ See:
 
 The code is in alpha -- very experimental.  Last tested against `drupal-8.0.2`.
 
-View / report issues at https://github.com/kentr/php-pm-drupal/issues.
+View / report issues at https://github.com/php-pm/php-pm-drupal/issues.
 
 ### Setup / Usage
 
