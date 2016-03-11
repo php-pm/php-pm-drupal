@@ -1,4 +1,4 @@
-# PHP-PM HttpDrupal Adapter
+# PHP-PM DrupalKernel Adapter
 
 ## Overview
 
@@ -8,7 +8,8 @@ The primary components are a bootstrap and bridge.
 
 See:
 * https://github.com/php-pm/php-pm
-* https://github.com/php-pm/php-pm-httpkernel.
+* https://github.com/php-pm/php-pm-httpkernel
+* http://marcjschmidt.de/blog/2014/02/08/php-high-performance.html
 
 The code is in alpha -- very experimental.  Last tested against `drupal-8.0.2`.
 
