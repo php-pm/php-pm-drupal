@@ -1,5 +1,5 @@
 {
-    "name": "php-pm/php-pm-drupal-adapter",
+    "name": "php-pm/drupal-adapter",
     "require": {
         "php-pm/php-pm": "*",
         "php-pm/httpkernel-adapter": "*"
