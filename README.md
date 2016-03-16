@@ -19,7 +19,7 @@ View / report issues at https://github.com/php-pm/php-pm-drupal/issues.
 
   1. Install Drupal.
 
-  2. From the Drupal web root, install this project with composer: `composer require kentr/php-pm-drupal-adapter`.
+  2. From the Drupal web root, install this project with composer: `composer require php-pm/drupal-adapter`.
 
   This will also install PHP-PM and the default React <-> Symfony bridge (php-pm/httpkernel-adapter).
 
