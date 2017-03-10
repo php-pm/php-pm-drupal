@@ -82,6 +82,7 @@ General idea is to use `[cgi-fcgi](https://docs.oracle.com/cd/E53394_01/html/E54
 
 Draft outline (needs work):
 
+* Install `cgi-fcgi` on your system.
 * Put `start-ppm-php-fpm.php` in your webroot.
 * Install and configure `PHP-FPM` to listen on port `9000`
 * Execute as `root`:
