@@ -67,10 +67,31 @@ Example:
 
 ```bash
 SCRIPT_NAME=/index.php \
+REQUEST_METHOD=GET \
 SERVER_NAME=localhost \
 SERVER_ADDRESS=127.0.0.1 \
 DOCUMENT_ROOT=/var/www/html \
-/var/www/html/vendor/bin/ppm start /var/www/html \
+vendor/bin/ppm start /var/www/html \
 --bridge=PHPPM\\Bridges\\DrupalKernel \
 --bootstrap=PHPPM\\Bootstraps\\Drupal
+```
+
+## Starting under PHP-FPM
+
+General idea is to use `[cgi-fcgi](https://docs.oracle.com/cd/E53394_01/html/E54763/cgi-fcgi-1.html)` as a bridge.
+
+Draft outline (needs work):
+
+* Put `start-ppm-php-fpm.php` in your webroot.
+* Install and configure `PHP-FPM` to listen on port `9000`
+* Execute as `root`:
+
+```
+SCRIPT_FILENAME=/var/www/html/start-ppm-php-fpm.php \
+SCRIPT_NAME=/index.php \
+REQUEST_METHOD=GET \
+SERVER_NAME=localhost \
+SERVER_ADDRESS=127.0.0.1 \
+DOCUMENT_ROOT=/var/www/html \
+cgi-fcgi -bind -connect 127.0.0.1:9000
 ```
